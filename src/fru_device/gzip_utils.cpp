@@ -1,5 +1,5 @@
 #include "gzip_utils.hpp"
-
+#include <gsl/gsl>
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
 #include <unistd.h>
@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-std::optional<std::string> gzipInflate(std::span<uint8_t> compressedBytes)
+std::optional<std::string> gzipInflate(gsl::span<uint8_t> compressedBytes)
 {
     std::string uncompressedBytes;
     if (compressedBytes.empty())
@@ -75,7 +75,7 @@ static std::vector<std::string> xpathText(xmlDocPtr doc, const char* xp)
         {
             xmlNodeSetPtr nodeTab = obj->nodesetval;
             size_t nodeNr = static_cast<size_t>(nodeTab->nodeNr);
-            std::span<xmlNodePtr> nodes{nodeTab->nodeTab, nodeNr};
+            gsl::span<xmlNodePtr> nodes{nodeTab->nodeTab, nodeNr};
             for (xmlNodePtr node : nodes)
             {
                 unsigned char* keyword = xmlNodeGetContent(node);

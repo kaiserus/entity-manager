@@ -2,7 +2,7 @@
 
 #include "perform_scan.hpp"
 
-#include <flat_map>
+#include <boost/container/flat_map.hpp>
 #include <memory>
 #include <string>
 #include <vector>

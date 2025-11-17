@@ -28,7 +28,7 @@
 #include <xyz/openbmc_project/Inventory/Item/common.hpp>
 
 #include <filesystem>
-#include <flat_map>
+#include <boost/container/flat_map.hpp>
 #include <fstream>
 #include <functional>
 #include <map>

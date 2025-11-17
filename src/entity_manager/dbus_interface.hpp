@@ -8,7 +8,7 @@
 #include <sdbusplus/asio/connection.hpp>
 #include <sdbusplus/asio/object_server.hpp>
 
-#include <flat_map>
+#include <boost/container/flat_map.hpp>
 #include <vector>
 
 namespace dbus_interface
@@ -51,7 +51,7 @@ class EMDBusInterface
 
   private:
     void addObject(
-        const std::flat_map<std::string, JsonVariantType, std::less<>>& data,
+        const boost::container::flat_map<std::string, JsonVariantType, std::less<>>& data,
         nlohmann::json& systemConfiguration, const std::string& jsonPointerPath,
         const std::string& path, const std::string& board);
 

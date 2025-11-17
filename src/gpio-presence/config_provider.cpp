@@ -8,8 +8,8 @@
 #include <sdbusplus/async/match.hpp>
 #include <sdbusplus/bus/match.hpp>
 #include <xyz/openbmc_project/ObjectMapper/client.hpp>
-
-#include <flat_map>
+#include <algorithm>
+#include <boost/container/flat_map.hpp>
 #include <ranges>
 #include <string>
 
@@ -18,8 +18,8 @@ PHOSPHOR_LOG2_USING;
 using VariantType =
     std::variant<std::vector<std::string>, std::string, int64_t, uint64_t,
                  double, int32_t, uint32_t, int16_t, uint16_t, uint8_t, bool>;
-using ConfigMap = std::flat_map<std::string, VariantType>;
-using ConfigData = std::flat_map<std::string, ConfigMap>;
+using ConfigMap = boost::container::flat_map<std::string, VariantType>;
+using ConfigData = boost::container::flat_map<std::string, ConfigMap>;
 
 namespace gpio_presence
 {
@@ -105,7 +105,7 @@ auto ConfigProvider::handleInterfacesAdded(AddedCallback addConfig)
 
         debug("Detected interface added on {OBJPATH}", "OBJPATH", objPath);
 
-        if (!std::ranges::contains(std::views::keys(intfMap), interface))
+        if (std::ranges::find(std::views::keys(intfMap), interface) == std::views::keys(intfMap).end())
         {
             continue;
         }
@@ -135,7 +135,7 @@ auto ConfigProvider::handleInterfacesRemoved(RemovedCallback removeConfig)
                                               std::vector<std::string>>();
         auto [objectPath, interfaces] = std::move(tmp);
 
-        if (!std::ranges::contains(interfaces, interface))
+        if (std::ranges::find(interfaces, interface) == interfaces.end())
         {
             continue;
         }

@@ -5,7 +5,7 @@
 
 #include <phosphor-logging/lg2.hpp>
 
-#include <flat_map>
+#include <boost/container/flat_map.hpp>
 #include <fstream>
 #include <regex>
 #include <string>
@@ -266,7 +266,7 @@ static void addObjectRuntimeValidateJson(const nlohmann::json& newData,
 }
 
 void EMDBusInterface::addObject(
-    const std::flat_map<std::string, JsonVariantType, std::less<>>& data,
+    const boost::container::flat_map<std::string, JsonVariantType, std::less<>>& data,
     nlohmann::json& systemConfiguration, const std::string& jsonPointerPath,
     const std::string& path, const std::string& board)
 {
@@ -381,7 +381,7 @@ void EMDBusInterface::createAddObjectMethod(
         "AddObject",
         [&systemConfiguration, jsonPointerPath{std::string(jsonPointerPath)},
          path{std::string(path)}, board{std::string(board)},
-         this](const std::flat_map<std::string, JsonVariantType, std::less<>>&
+         this](const boost::container::flat_map<std::string, JsonVariantType, std::less<>>&
                    data) {
             addObject(data, systemConfiguration, jsonPointerPath, path, board);
         });

@@ -5,7 +5,7 @@
 #include <nlohmann/json.hpp>
 #include <xyz/openbmc_project/Inventory/Decorator/Asset/common.hpp>
 
-#include <flat_map>
+#include <boost/container/flat_map.hpp>
 #include <string>
 
 struct InvAddRemoveInfo

@@ -1,5 +1,5 @@
 #include "topology.hpp"
-
+#include <algorithm>
 #include "phosphor-logging/lg2.hpp"
 
 const AssocName assocContaining =
@@ -170,7 +170,7 @@ std::unordered_map<std::string, std::set<Association>> Topology::getAssocs(
 
     for (const auto& [boardPath, probePaths] : probePaths)
     {
-        if (std::ranges::contains(boardPaths, boardPath))
+        if (std::ranges::find(boardPaths, boardPath) != std::ranges::end(boardPaths))
         {
             for (const auto& path : probePaths)
             {
@@ -228,7 +228,7 @@ void Topology::fillAssocForPortId(
         return;
     }
     // The downstream path must be one we care about.
-    if (!std::ranges::contains(boardPaths, upstream))
+    if (std::ranges::find(boardPaths, upstream) == std::ranges::end(boardPaths))
     {
         return;
     }

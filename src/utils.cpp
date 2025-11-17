@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <cctype>
 #include <filesystem>
-#include <flat_map>
+#include <boost/container/flat_map.hpp>
 #include <map>
 #include <ranges>
 #include <regex>
@@ -79,7 +79,7 @@ bool findFiles(const std::vector<fs::path>& dirPaths,
 }
 
 bool getI2cDevicePaths(const fs::path& dirPath,
-                       std::flat_map<size_t, fs::path>& busPaths)
+                       boost::container::flat_map<size_t, fs::path>& busPaths)
 {
     if (!fs::exists(dirPath))
     {

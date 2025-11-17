@@ -12,7 +12,7 @@
 #include <sdbusplus/asio/connection.hpp>
 #include <sdbusplus/asio/object_server.hpp>
 
-#include <flat_map>
+#include <boost/container/flat_map.hpp>
 #include <string>
 
 class EntityManager
@@ -84,7 +84,7 @@ class EntityManager
     boost::asio::steady_timer propertiesChangedTimer;
     size_t propertiesChangedInstance = 0;
 
-    std::flat_map<std::string, sdbusplus::bus::match_t, std::less<>>
+    boost::container::flat_map<std::string, sdbusplus::bus::match_t, std::less<>>
         dbusMatches;
 
     void startRemovedTimer(boost::asio::steady_timer& timer,

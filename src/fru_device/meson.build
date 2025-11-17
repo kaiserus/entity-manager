@@ -19,6 +19,7 @@ executable(
     cpp_args: cpp_args_fd,
     dependencies: [
         boost,
+        fmt_dep,
         i2c,
         libxml2_dep,
         nlohmann_json_dep,

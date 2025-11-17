@@ -38,6 +38,10 @@ endif
 nlohmann_json_dep = dependency('nlohmann_json', include_type: 'system')
 sdbusplus = dependency('sdbusplus')
 phosphor_logging_dep = dependency('phosphor-logging')
+fmt_dep = dependency('fmt', required: false)
+if not fmt_dep.found()
+    fmt_dep = cpp.find_library('fmt', required: true)
+endif
 zlib_dep = dependency('zlib', include_type: 'system')
 libxml2_dep = dependency('libxml-2.0', include_type: 'system')
 

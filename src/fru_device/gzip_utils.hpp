@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright 2018 Intel Corporation
 
 #pragma once
-
+#include <gsl/gsl>
 #include <array>
 #include <cstdint>
 #include <optional>
@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-std::optional<std::string> gzipInflate(std::span<uint8_t> compressedBytes);
+std::optional<std::string> gzipInflate(gsl::span<uint8_t> compressedBytes);
 
 std::vector<std::string> getNodeFromXml(std::string_view xml,
                                         const char* nodeName);

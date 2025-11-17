@@ -5,10 +5,11 @@
 #include "fru_reader.hpp"
 
 #include <sdbusplus/asio/object_server.hpp>
-
+#include <gsl/gsl>
 #include <cstdint>
 #include <cstdio>
-#include <flat_map>
+#include <boost/container/flat_map.hpp>
+#include <boost/container/flat_set.hpp>
 #include <functional>
 #include <regex>
 #include <string>
@@ -22,8 +23,8 @@ extern "C"
 
 constexpr size_t fruBlockSize = 8;
 
-using DeviceMap = std::flat_map<int, std::vector<uint8_t>>;
-using BusMap = std::flat_map<int, std::shared_ptr<DeviceMap>>;
+using DeviceMap = boost::container::flat_map<int, std::vector<uint8_t>>;
+using BusMap = boost::container::flat_map<int, std::shared_ptr<DeviceMap>>;
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 inline BusMap busMap;
@@ -100,25 +101,25 @@ constexpr std::array<char, 6> bcdHighChars = {
 
 char bcdPlusToChar(uint8_t val);
 
-bool verifyOffset(std::span<const uint8_t> fruBytes, fruAreas currentArea,
+bool verifyOffset(gsl::span<const uint8_t> fruBytes, fruAreas currentArea,
                   uint8_t len);
 
 std::pair<DecodeState, std::string> decodeFRUData(
-    std::span<const uint8_t>::const_iterator& iter,
-    std::span<const uint8_t>::const_iterator& end, bool isLangEng);
+    gsl::span<const uint8_t>::iterator& iter,
+    gsl::span<const uint8_t>::iterator& end, bool isLangEng);
 
 bool checkLangEng(uint8_t lang);
 
 resCodes formatIPMIFRU(
-    std::span<const uint8_t> fruBytes,
-    std::flat_map<std::string, std::string, std::less<>>& result);
+    gsl::span<const uint8_t> fruBytes,
+    boost::container::flat_map<std::string, std::string, std::less<>>& result);
 
 std::vector<uint8_t>& getFRUInfo(const uint16_t& bus, const uint8_t& address);
 
-uint8_t calculateChecksum(std::span<const uint8_t>::const_iterator iter,
-                          std::span<const uint8_t>::const_iterator end);
+uint8_t calculateChecksum(gsl::span<const uint8_t>::iterator iter,
+                          gsl::span<const uint8_t>::iterator end);
 
-uint8_t calculateChecksum(std::span<const uint8_t> fruAreaData);
+uint8_t calculateChecksum(gsl::span<const uint8_t> fruAreaData);
 
 unsigned int updateFRUAreaLenAndChecksum(
     std::vector<uint8_t>& fruData, size_t fruAreaStart,
@@ -198,7 +199,7 @@ bool copyRestFRUArea(std::vector<uint8_t>& fruData,
 /// \return optional<int> highest index for fru device on success, return
 /// nullopt on failure.
 std::optional<int> findIndexForFRU(
-    std::flat_map<std::pair<size_t, size_t>,
+    boost::container::flat_map<std::pair<size_t, size_t>,
                   std::shared_ptr<sdbusplus::asio::dbus_interface>>&
         dbusInterfaceMap,
     std::string& productName);
@@ -214,7 +215,7 @@ std::optional<int> findIndexForFRU(
 
 std::optional<std::string> getProductName(
     std::vector<uint8_t>& device,
-    std::flat_map<std::string, std::string, std::less<>>& formattedFRU,
+    boost::container::flat_map<std::string, std::string, std::less<>>& formattedFRU,
     uint32_t bus, uint32_t address, size_t& unknownBusObjectCount);
 
 bool getFruData(std::vector<uint8_t>& fruData, uint32_t bus, uint32_t address);

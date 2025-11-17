@@ -14,7 +14,7 @@
 #include <phosphor-logging/lg2.hpp>
 
 #include <filesystem>
-#include <flat_map>
+#include <boost/container/flat_map.hpp>
 #include <fstream>
 #include <iomanip>
 #include <regex>

@@ -9,15 +9,15 @@
 
 #include <charconv>
 #include <filesystem>
-#include <flat_map>
+#include <boost/container/flat_map.hpp>
 
 using DBusValueVariant =
     std::variant<std::string, int64_t, uint64_t, double, int32_t, uint32_t,
                  int16_t, uint16_t, uint8_t, bool, std::vector<uint8_t>>;
-using DBusInterface = std::flat_map<std::string, DBusValueVariant, std::less<>>;
-using DBusObject = std::flat_map<std::string, DBusInterface, std::less<>>;
+using DBusInterface = boost::container::flat_map<std::string, DBusValueVariant, std::less<>>;
+using DBusObject = boost::container::flat_map<std::string, DBusInterface, std::less<>>;
 using MapperGetSubTreeResponse =
-    std::flat_map<std::string, DBusObject, std::less<>>;
+    boost::container::flat_map<std::string, DBusObject, std::less<>>;
 using FirstIndex = size_t;
 using LastIndex = size_t;
 
@@ -29,7 +29,7 @@ bool findFiles(const std::vector<std::filesystem::path>& dirPaths,
                std::vector<std::filesystem::path>& foundPaths);
 
 bool getI2cDevicePaths(const std::filesystem::path& dirPath,
-                       std::flat_map<size_t, std::filesystem::path>& busPaths);
+                       boost::container::flat_map<size_t, std::filesystem::path>& busPaths);
 
 struct DBusInternalError final : public sdbusplus::exception_t
 {

@@ -4,9 +4,7 @@
 #include "fru_utils.hpp"
 
 #include "gzip_utils.hpp"
-
 #include <phosphor-logging/lg2.hpp>
-
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -87,8 +85,8 @@ enum SubManagementAccessRecord : uint8_t
  * iterator is no longer usable.
  */
 std::pair<DecodeState, std::string> decodeFRUData(
-    std::span<const uint8_t>::const_iterator& iter,
-    std::span<const uint8_t>::const_iterator& end, bool isLangEng)
+    gsl::span<const uint8_t>::iterator& iter,
+    gsl::span<const uint8_t>::iterator& end, bool isLangEng)
 {
     std::string value;
     unsigned int i = 0;
@@ -210,7 +208,7 @@ bool checkLangEng(uint8_t lang)
  * len:         Length of current area space and it is a multiple of 8 bytes
  *              as per specification
  */
-bool verifyOffset(std::span<const uint8_t> fruBytes, fruAreas currentArea,
+bool verifyOffset(gsl::span<const uint8_t> fruBytes, fruAreas currentArea,
                   uint8_t len)
 {
     unsigned int fruBytesSize = fruBytes.size();
@@ -276,8 +274,8 @@ bool verifyOffset(std::span<const uint8_t> fruBytes, fruAreas currentArea,
 }
 
 static void parseMultirecordUUID(
-    std::span<const uint8_t> device,
-    std::flat_map<std::string, std::string, std::less<>>& result)
+    gsl::span<const uint8_t> device,
+    boost::container::flat_map<std::string, std::string, std::less<>>& result)
 {
     constexpr size_t uuidDataLen = 16;
     constexpr size_t multiRecordHeaderLen = 5;
@@ -303,7 +301,7 @@ static void parseMultirecordUUID(
     }
 
     areaOffset *= fruBlockSize;
-    std::span<const uint8_t>::const_iterator fruBytesIter =
+    gsl::span<const uint8_t>::iterator fruBytesIter =
         device.begin() + areaOffset;
 
     /* Verify area offset */
@@ -360,11 +358,11 @@ static void parseMultirecordUUID(
 }
 
 resCodes decodeField(
-    std::span<const uint8_t>::const_iterator& fruBytesIter,
-    std::span<const uint8_t>::const_iterator& fruBytesIterEndArea,
+    gsl::span<const uint8_t>::iterator& fruBytesIter,
+    gsl::span<const uint8_t>::iterator& fruBytesIterEndArea,
     const std::vector<std::string>& fruAreaFieldNames, size_t& fieldIndex,
     DecodeState& state, bool isLangEng, const fruAreas& area,
-    std::flat_map<std::string, std::string, std::less<>>& result)
+    boost::container::flat_map<std::string, std::string, std::less<>>& result)
 {
     auto res = decodeFRUData(fruBytesIter, fruBytesIterEndArea, isLangEng);
     state = res.first;
@@ -431,8 +429,8 @@ resCodes decodeField(
 }
 
 resCodes formatIPMIFRU(
-    std::span<const uint8_t> fruBytes,
-    std::flat_map<std::string, std::string, std::less<>>& result)
+    gsl::span<const uint8_t> fruBytes,
+    boost::container::flat_map<std::string, std::string, std::less<>>& result)
 {
     resCodes ret = resCodes::resOK;
     if (fruBytes.size() <= fruBlockSize)
@@ -455,7 +453,7 @@ resCodes formatIPMIFRU(
             continue;
         }
         offset *= fruBlockSize;
-        std::span<const uint8_t>::const_iterator fruBytesIter =
+        gsl::span<const uint8_t>::iterator fruBytesIter =
             fruBytes.begin() + offset;
         if (fruBytesIter + fruBlockSize >= fruBytes.end())
         {
@@ -480,7 +478,7 @@ resCodes formatIPMIFRU(
         }
 
         size_t fruAreaSize = *fruBytesIter * fruBlockSize;
-        std::span<const uint8_t>::const_iterator fruBytesIterEndArea =
+        gsl::span<const uint8_t>::iterator fruBytesIterEndArea =
             fruBytes.begin() + offset + fruAreaSize - 1;
         ++fruBytesIter;
 
@@ -600,15 +598,15 @@ resCodes formatIPMIFRU(
 }
 
 // Calculate new checksum for fru info area
-uint8_t calculateChecksum(std::span<const uint8_t>::const_iterator iter,
-                          std::span<const uint8_t>::const_iterator end)
+uint8_t calculateChecksum(gsl::span<const uint8_t>::iterator iter,
+                          gsl::span<const uint8_t>::iterator end)
 {
     constexpr int checksumMod = 256;
     uint8_t sum = std::accumulate(iter, end, static_cast<uint8_t>(0));
     return (checksumMod - sum) % checksumMod;
 }
 
-uint8_t calculateChecksum(std::span<const uint8_t> fruAreaData)
+uint8_t calculateChecksum(gsl::span<const uint8_t> fruAreaData)
 {
     return calculateChecksum(fruAreaData.begin(), fruAreaData.end());
 }
@@ -998,8 +996,10 @@ static bool updateHeaderChecksum(std::vector<uint8_t>& fruData)
     }
 
     uint8_t& checksumInBytes = fruData[7];
-    uint8_t checksum =
-        calculateChecksum({fruData.begin(), fruData.begin() + 7});
+    // uint8_t checksum = calculateChecksum({fruData.begin(), fruData.begin() + 7});
+    auto header = gsl::make_span(fruData).subspan(0, 7);
+    uint8_t checksum = calculateChecksum(header);
+
     std::swap(checksumInBytes, checksum);
 
     if (checksumInBytes != checksum)
@@ -1043,7 +1043,7 @@ bool updateAreaChecksum(std::vector<uint8_t>& fruArea)
 }
 
 static std::optional<size_t> calculateAreaSize(
-    fruAreas area, std::span<const uint8_t> fruData, size_t areaOffset)
+    fruAreas area, gsl::span<const uint8_t> fruData, size_t areaOffset)
 {
     switch (area)
     {
@@ -1232,7 +1232,7 @@ static std::optional<FieldInfo> findOrCreateField(
                      static_cast<size_t>(fieldIndex)};
 }
 
-static std::optional<size_t> findEndOfFieldMarker(std::span<uint8_t> bytes)
+static std::optional<size_t> findEndOfFieldMarker(gsl::span<uint8_t> bytes)
 {
     // we're skipping the checksum
     // this function assumes a properly sized and formatted area
@@ -1247,7 +1247,7 @@ static std::optional<size_t> findEndOfFieldMarker(std::span<uint8_t> bytes)
     return std::nullopt;
 }
 
-static std::optional<size_t> getNonPaddedSizeOfArea(std::span<uint8_t> bytes)
+static std::optional<size_t> getNonPaddedSizeOfArea(gsl::span<uint8_t> bytes)
 {
     if (auto endOfFields = findEndOfFieldMarker(bytes))
     {
@@ -1288,7 +1288,7 @@ bool setField(const fruAreas& fruAreaToUpdate, std::vector<uint8_t>& areaData,
     tmpBuffer.erase(fieldIt, fieldIt + fieldInfo->length + 1);
     // Insert the new field value
     tmpBuffer.insert(fieldIt, 0xc0 | value.size());
-    tmpBuffer.insert_range(fieldIt + 1, value);
+    tmpBuffer.insert(fieldIt + 1, value.begin(), value.end());
 
     auto newSize = getNonPaddedSizeOfArea(tmpBuffer);
     auto oldSize = getNonPaddedSizeOfArea(areaData);
@@ -1368,7 +1368,8 @@ bool assembleFruData(std::vector<uint8_t>& fruData,
 
         // Set the area offset in the header
         fruData[getHeaderAreaFieldOffset(area)] = writeOffset / fruBlockSize;
-        fruData.append_range(areaBytes);
+        fruData.reserve(fruData.size() + areaBytes.size());
+        fruData.insert(fruData.end(), areaBytes.begin(), areaBytes.end());
         writeOffset += areaBytes.size();
     }
 
@@ -1594,7 +1595,7 @@ bool copyRestFRUArea(std::vector<uint8_t>& fruData,
 // regular expression and find the device index for all devices.
 
 std::optional<int> findIndexForFRU(
-    std::flat_map<std::pair<size_t, size_t>,
+    boost::container::flat_map<std::pair<size_t, size_t>,
                   std::shared_ptr<sdbusplus::asio::dbus_interface>>&
         dbusInterfaceMap,
     std::string& productName)
@@ -1640,7 +1641,7 @@ std::optional<int> findIndexForFRU(
 
 std::optional<std::string> getProductName(
     std::vector<uint8_t>& device,
-    std::flat_map<std::string, std::string, std::less<>>& formattedFRU,
+    boost::container::flat_map<std::string, std::string, std::less<>>& formattedFRU,
     uint32_t bus, uint32_t address, size_t& unknownBusObjectCount)
 {
     std::string productName;
@@ -1732,7 +1733,7 @@ bool isFieldEditable(std::string_view fieldName)
     }
 
     // Match against editable fields
-    return std::ranges::contains(editableFields, subField);
+    return std::ranges::find(editableFields, subField) != std::ranges::end(editableFields);
 }
 
 bool updateAddProperty(const std::string& propertyValue,

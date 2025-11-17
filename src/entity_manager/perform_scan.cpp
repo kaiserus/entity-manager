@@ -10,8 +10,9 @@
 #include <phosphor-logging/lg2.hpp>
 
 #include <charconv>
-#include <flat_map>
-#include <flat_set>
+#include <boost/container/flat_map.hpp>
+#include <boost/container/flat_set.hpp>
+boost::container::flat_set<std::string, std::less<>> dbusProbeInterfaces;
 
 using GetSubTreeType = std::vector<
     std::pair<std::string,
@@ -99,7 +100,7 @@ static void processDbusObjects(
 // for the paths that own the interfaces passed in.
 void findDbusObjects(
     std::vector<std::shared_ptr<probe::PerformProbe>>&& probeVector,
-    std::flat_set<std::string, std::less<>>&& interfaces,
+    boost::container::flat_set<std::string, std::less<>>&& interfaces,
     const std::shared_ptr<scan::PerformScan>& scan, boost::asio::io_context& io,
     size_t retries = 5)
 {
@@ -542,7 +543,6 @@ void scan::PerformScan::updateSystemConfiguration(
 
 void scan::PerformScan::run()
 {
-    std::flat_set<std::string, std::less<>> dbusProbeInterfaces;
     std::vector<std::shared_ptr<probe::PerformProbe>> dbusProbePointers;
 
     for (auto it = _configurations.begin(); it != _configurations.end();)

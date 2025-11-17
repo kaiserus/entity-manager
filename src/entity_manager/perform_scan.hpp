@@ -8,7 +8,7 @@
 #include <nlohmann/json.hpp>
 #include <sdbusplus/asio/object_server.hpp>
 
-#include <flat_map>
+#include <boost/container/flat_map.hpp>
 #include <functional>
 #include <list>
 #include <vector>

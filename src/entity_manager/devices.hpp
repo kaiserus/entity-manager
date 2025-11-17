@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright 2018 Intel Corporation
 
 #pragma once
-#include <flat_map>
+#include <boost/container/flat_map.hpp>
 
 namespace devices
 {
@@ -42,7 +42,7 @@ struct ExportTemplate
     createsHWMon hasHWMonDir;
 };
 
-const std::flat_map<std::string_view, ExportTemplate, std::less<>>
+const boost::container::flat_map<std::string_view, ExportTemplate, std::less<>>
     exportTemplates{
         {{"EEPROM_24C01",
           ExportTemplate("24c01 $Address", "/sys/bus/i2c/devices/i2c-$Bus",
